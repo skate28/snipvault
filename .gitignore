@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# local editor state
+.vscode/
+.idea/
+.cursor/cache/
+
+# never commit a real vault
+.snipvault.json
+*.local.json

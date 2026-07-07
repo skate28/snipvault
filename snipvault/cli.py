@@ -1,0 +1,80 @@
+"""Command-line interface for Snippet Vault."""
+
+from __future__ import annotations
+
+import argparse
+import sys
+
+from .storage import DEFAULT_VAULT, Snippet, Vault
+
+
+def _format_row(s: Snippet) -> str:
+    tags = ", ".join(s.tags) if s.tags else "-"
+    return f"{s.id:>4}  {s.title:<30.30}  {s.language:<10.10}  {tags}"
+
+
+def _print_table(snippets: list[Snippet]) -> None:
+    if not snippets:
+        print("(no snippets)")
+        return
+    print(f"{'id':>4}  {'title':<30}  {'language':<10}  tags")
+    print("-" * 70)
+    for s in snippets:
+        print(_format_row(s))
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="snipvault", description="Store and retrieve code snippets locally."
+    )
+    parser.add_argument(
+        "--vault", default=str(DEFAULT_VAULT), help="path to the vault JSON file"
+    )
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    p_add = sub.add_parser("add", help="add a snippet")
+    p_add.add_argument("title")
+    p_add.add_argument("code")
+    p_add.add_argument("--lang", default="text", help="language (default: text)")
+    p_add.add_argument("--tags", default="", help="comma-separated tags")
+
+    sub.add_parser("list", help="list all snippets")
+
+    p_show = sub.add_parser("show", help="print a snippet's code by id")
+    p_show.add_argument("id", type=int)
+
+    p_search = sub.add_parser("search", help="search title, language, tags, and code")
+    p_search.add_argument("query")
+
+    p_rm = sub.add_parser("rm", help="delete a snippet by id")
+    p_rm.add_argument("id", type=int)
+
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    vault = Vault(args.vault)
+
+    try:
+        if args.command == "add":
+            tags = [t for t in args.tags.split(",") if t.strip()]
+            snippet = vault.add(args.title, args.lang, args.code, tags)
+            print(f"added snippet {snippet.id}: {snippet.title}")
+        elif args.command == "list":
+            _print_table(vault.all())
+        elif args.command == "show":
+            print(vault.get(args.id).code)
+        elif args.command == "search":
+            _print_table(vault.search(args.query))
+        elif args.command == "rm":
+            snippet = vault.remove(args.id)
+            print(f"removed snippet {snippet.id}: {snippet.title}")
+    except (ValueError, KeyError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
