@@ -1,0 +1,22 @@
+# Changelog
+
+All notable changes to Snippet Vault are documented here.
+This project follows [Semantic Versioning](https://semver.org/).
+
+## v0.1.2
+
+- `snipvault help` (and bare `snipvault`) now print a friendly command list with a
+  copy-paste example for each command, plus notes on optional flags.
+- Help text is ASCII-only to avoid Windows console encoding issues.
+
+## v0.1.1
+
+- Added a `help` command; bare `snipvault` now shows help instead of an error.
+
+## v0.1.0
+
+- First release: `add`, `list`, `show`, `search`, and `rm` commands backed by a
+  local JSON vault (`~/.snipvault.json`).
+- Prebuilt single-file binaries for Windows, macOS, and Linux.
+- One-line install/uninstall scripts and a `pip install` from source option.
+- Landing page with OS-detected downloads.

@@ -36,16 +36,38 @@ These remove the binary and PATH entry but **leave your saved snippets** at
 
 Run `snipvault help` (or just `snipvault` with no arguments) any time to see all commands.
 
+### Commands
+
+| Command | What it does | Example |
+| --- | --- | --- |
+| `add` | Save a snippet | `snipvault add "title" "code here" --lang python --tags tag1,tag2` |
+| `list` | List all your snippets | `snipvault list` |
+| `search` | Search titles, languages, tags, and code | `snipvault search keyword` |
+| `show` | Print a snippet's code by its id | `snipvault show 1` |
+| `rm` | Delete a snippet by its id | `snipvault rm 1` |
+| `help` | Show the command list | `snipvault help` |
+
+`--lang` (default `text`) and `--tags` are optional; tags are comma-separated.
+Add `--vault <path>` before any command to use a different vault file (handy for
+per-project vaults or testing).
+
+### Example session
+
 ```
-python -m snipvault add "list comprehension" "[x*2 for x in items]" --lang python --tags loops,python
-python -m snipvault list
-python -m snipvault search loops
-python -m snipvault show 1
-python -m snipvault rm 1
+$ snipvault add "recursive delete" "Remove-Item -Recurse -Force path" --lang powershell --tags files
+added snippet 1: recursive delete
+
+$ snipvault search files
+  id  title                 language    tags
+----------------------------------------------------
+   1  recursive delete      powershell  files
+
+$ snipvault show 1
+Remove-Item -Recurse -Force path
 ```
 
-Use `--vault path\to\file.json` before the command to point at a different vault file
-(handy for testing or keeping vaults per project).
+Snippets are stored in a single JSON file at `~/.snipvault.json` — plain text you
+can back up, sync, or edit by hand.
 
 ## Project layout
 
