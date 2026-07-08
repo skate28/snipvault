@@ -7,6 +7,30 @@ import sys
 
 from .storage import DEFAULT_VAULT, Snippet, Vault
 
+# (command, one-line description, example of exactly what to type)
+COMMANDS = [
+    ("add", "Save a snippet", 'snipvault add "title" "code here" --lang python --tags tag1,tag2'),
+    ("list", "List all your snippets", "snipvault list"),
+    ("search", "Search titles, languages, tags, and code", "snipvault search keyword"),
+    ("show", "Print a snippet's code by its id", "snipvault show 1"),
+    ("rm", "Delete a snippet by its id", "snipvault rm 1"),
+    ("help", "Show this help message", "snipvault help"),
+]
+
+
+def print_help() -> None:
+    """Print a friendly command list with a copy-paste example for each."""
+    print("snipvault - store and retrieve code snippets locally\n")
+    print("Usage: snipvault <command> [options]\n")
+    print("Commands:")
+    for name, desc, example in COMMANDS:
+        print(f"  {name:<7} {desc}")
+        print(f"          $ {example}")
+    print()
+    print("Notes:")
+    print("  --lang and --tags are optional; tags are comma-separated (tag1,tag2).")
+    print("  Add --vault <path> before any command to use a different vault file.")
+
 
 def _format_row(s: Snippet) -> str:
     tags = ", ".join(s.tags) if s.tags else "-"
@@ -60,7 +84,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # Bare `snipvault` or `snipvault help` prints the full command list.
     if args.command is None or args.command == "help":
-        parser.print_help()
+        print_help()
         return 0
 
     vault = Vault(args.vault)
