@@ -3,6 +3,11 @@
 All notable changes to Snippet Vault are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## v0.1.3
+
+- Added a `snipvault uninstall` command that prints the exact OS-specific
+  removal command (a running binary can't reliably delete itself).
+
 ## v0.1.2
 
 - `snipvault help` (and bare `snipvault`) now print a friendly command list with a

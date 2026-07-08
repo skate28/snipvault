@@ -14,8 +14,29 @@ COMMANDS = [
     ("search", "Search titles, languages, tags, and code", "snipvault search keyword"),
     ("show", "Print a snippet's code by its id", "snipvault show 1"),
     ("rm", "Delete a snippet by its id", "snipvault rm 1"),
+    ("uninstall", "Show how to remove Snippet Vault", "snipvault uninstall"),
     ("help", "Show this help message", "snipvault help"),
 ]
+
+_RAW = "https://raw.githubusercontent.com/skate28/snipvault/main"
+
+
+def print_uninstall_help() -> None:
+    """Print the command to fully remove Snippet Vault for the current OS.
+
+    A running binary can't reliably delete itself (on Windows the .exe is
+    locked while executing), so we show the exact one-liner to run instead.
+    """
+    print("To uninstall Snippet Vault, run:\n")
+    if sys.platform == "win32":
+        print(f"  irm {_RAW}/uninstall.ps1 | iex")
+    else:
+        print(f"  curl -fsSL {_RAW}/uninstall.sh | sh")
+    print()
+    print("This removes the snipvault binary and its PATH entry. Your saved")
+    print("snippets in ~/.snipvault.json are kept - delete that file yourself")
+    print("if you also want to erase your data.")
+    print("(If you installed with pip instead: pip uninstall snipvault)")
 
 
 def print_help() -> None:
@@ -75,6 +96,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_rm = sub.add_parser("rm", help="delete a snippet by id")
     p_rm.add_argument("id", type=int)
 
+    sub.add_parser("uninstall", help="show how to remove Snippet Vault")
+
     return parser
 
 
@@ -85,6 +108,10 @@ def main(argv: list[str] | None = None) -> int:
     # Bare `snipvault` or `snipvault help` prints the full command list.
     if args.command is None or args.command == "help":
         print_help()
+        return 0
+
+    if args.command == "uninstall":
+        print_uninstall_help()
         return 0
 
     vault = Vault(args.vault)

@@ -45,6 +45,7 @@ Run `snipvault help` (or just `snipvault` with no arguments) any time to see all
 | `search` | Search titles, languages, tags, and code | `snipvault search keyword` |
 | `show` | Print a snippet's code by its id | `snipvault show 1` |
 | `rm` | Delete a snippet by its id | `snipvault rm 1` |
+| `uninstall` | Show how to remove Snippet Vault | `snipvault uninstall` |
 | `help` | Show the command list | `snipvault help` |
 
 `--lang` (default `text`) and `--tags` are optional; tags are comma-separated.

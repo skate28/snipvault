@@ -84,6 +84,14 @@ class CliTests(unittest.TestCase):
         self.assertIn("Commands:", out)
         self.assertIn("snipvault add", out)
 
+    def test_uninstall_prints_instructions(self):
+        code, out, _ = self.run_cli("uninstall")
+        self.assertEqual(code, 0)
+        self.assertIn("uninstall", out.lower())
+        # Shows an OS-appropriate command and preserves the user's data note.
+        self.assertTrue("uninstall.ps1" in out or "uninstall.sh" in out)
+        self.assertIn(".snipvault.json", out)
+
 
 if __name__ == "__main__":
     unittest.main()
