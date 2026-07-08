@@ -19,8 +19,27 @@ from any terminal. All data lives in a single local JSON file — no database, n
 
 ## Installation
 
+There are two ways to install: a **prebuilt binary** (no Python needed) or **from source** (for development).
+
+### Prebuilt binary — recommended for users
+
+The one-line installers download a single self-contained executable from the
+[latest GitHub release](https://github.com/skate28/snipvault/releases/latest) and put
+`snipvault` on your PATH. No Python required.
+
+- **Windows (PowerShell):** `irm https://raw.githubusercontent.com/skate28/snipvault/main/install.ps1 | iex`
+  Installs to `%LOCALAPPDATA%\snipvault\bin` and adds it to your user PATH.
+- **macOS / Linux:** `curl -fsSL https://raw.githubusercontent.com/skate28/snipvault/main/install.sh | sh`
+  Installs to `~/.local/bin/snipvault`.
+
+You can also just download the binary for your OS directly from the releases page and run it.
+
+There is also a landing page with OS-detecting download buttons (deployed to Vercel from `website/`).
+
+### From source — for development
+
 Requires **Python 3.10 or newer** ([python.org/downloads](https://www.python.org/downloads/)).
-The install steps are the same on every OS — only the terminal and path style differ.
+The steps are the same on every OS — only the terminal and path style differ.
 
 ### Windows (PowerShell)
 

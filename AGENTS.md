@@ -8,6 +8,16 @@ Package: `snipvault/`. Tests: `tests/`. Full docs: `snipvault-docs.md`.
 - Run tests (do this before considering any change done): `python -m unittest discover -s tests -v`
 - Reinstall after packaging changes: `python -m pip install -e .`
 - Run the app: `snipvault --help` (installed) or `python -m snipvault --help`
+- Website (Next.js, in `website/`): `cd website && npm run dev` (local) / `npm run build` (verify).
+  The website is a separate npm project with its own `AGENTS.md` — read that before editing it.
+
+## Distribution
+
+- Release binaries are built by `.github/workflows/release.yml` on pushing a `v*` tag
+  (PyInstaller `--onefile` per OS). Cut a release with the `/release` skill, then
+  `git tag vX.Y.Z && git push origin vX.Y.Z`.
+- Install scripts `install.ps1` / `install.sh` pull the latest release binary — keep the
+  asset names in them in sync with the workflow's build matrix.
 
 ## Hard constraints
 

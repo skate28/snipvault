@@ -3,6 +3,26 @@
 A tiny, dependency-free command-line code-snippet manager in Python (3.10+).
 Snippets are stored in a single JSON file (default `~/.snipvault.json`).
 
+## Install
+
+No Python required — the installers download a single self-contained binary.
+
+**Windows (PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/skate28/snipvault/main/install.ps1 | iex
+```
+
+**macOS / Linux:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/skate28/snipvault/main/install.sh | sh
+```
+
+Or download a binary directly from the [latest release](https://github.com/skate28/snipvault/releases/latest),
+or install from source with pip:
+```bash
+pip install git+https://github.com/skate28/snipvault.git
+```
+
 ## Usage
 
 Run from the project root:
@@ -25,13 +45,18 @@ snippet-vault/
 ├── AGENTS.md             # cross-tool agent instructions (Claude Code, Cursor, ...)
 ├── CLAUDE.md             # one-line shim importing AGENTS.md
 ├── pyproject.toml        # packaging + the `snipvault` console command
+├── install.ps1           # Windows one-line installer
+├── install.sh            # macOS/Linux one-line installer
 ├── snipvault/
 │   ├── storage.py        # Snippet dataclass + JSON-backed Vault
 │   ├── cli.py            # argparse CLI (add / list / show / search / rm)
 │   └── __main__.py       # enables `python -m snipvault`
+├── packaging/entry.py    # PyInstaller entry point for release binaries
+├── website/              # Next.js landing page (deployed to Vercel)
 ├── tests/
 │   ├── test_storage.py   # Vault unit tests
 │   └── test_cli.py       # end-to-end CLI tests (in-process, no subprocess)
+├── .github/workflows/    # CI tests + tag-triggered release binary builds
 ├── .githooks/
 │   └── pre-commit        # runs the test suite before every commit
 └── .claude/

@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #08090c;
+  --bg-elev: #0e1016;
+  --bg-card: #111420;
+  --border: #1e2230;
+  --border-bright: #2b3145;
+  --fg: #e7e9ee;
+  --fg-dim: #9aa1b1;
+  --fg-faint: #626a7d;
+  --accent: #5eead4;
+  --accent-strong: #2dd4bf;
+  --accent-glow: rgba(45, 212, 191, 0.18);
+  --term-green: #6ee7a8;
+  --term-yellow: #f5d97a;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-elev: var(--bg-elev);
+  --color-bg-card: var(--bg-card);
+  --color-border: var(--border);
+  --color-border-bright: var(--border-bright);
+  --color-fg: var(--fg);
+  --color-fg-dim: var(--fg-dim);
+  --color-fg-faint: var(--fg-faint);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-term-green: var(--term-green);
+  --color-term-yellow: var(--term-yellow);
+  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-geist-sans);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle grid + glow backdrop for the hero */
+.backdrop-grid {
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  opacity: 0.35;
+}
+
+.glow {
+  background: radial-gradient(ellipse 50% 45% at 50% 0%, var(--accent-glow), transparent 70%);
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+.cursor-blink { animation: blink 1s step-end infinite; }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fade-up 0.5s ease both; }
