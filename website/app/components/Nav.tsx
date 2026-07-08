@@ -5,22 +5,30 @@ export function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-bg/80 backdrop-blur-md">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-        <a href="#top" className="flex items-center gap-2.5">
-          <Logo className="h-7 w-7" />
-          <span className="font-semibold tracking-tight">Snippet Vault</span>
-          <span className="hidden rounded-full border border-border bg-bg-elev px-2 py-0.5 font-mono text-[11px] text-fg-faint sm:inline">
+        <div className="flex items-center gap-2.5">
+          <a href="/" className="flex items-center gap-2.5">
+            <Logo className="h-7 w-7" />
+            <span className="font-semibold tracking-tight">Snippet Vault</span>
+          </a>
+          <a
+            href="/versions"
+            className="hidden rounded-full border border-border bg-bg-elev px-2 py-0.5 font-mono text-[11px] text-fg-faint transition hover:border-accent hover:text-accent sm:inline"
+          >
             {VERSION}
-          </span>
-        </a>
+          </a>
+        </div>
         <div className="flex items-center gap-6 text-sm text-fg-dim">
-          <a href="#install" className="hidden transition hover:text-fg sm:inline">
+          <a href="/#install" className="hidden transition hover:text-fg sm:inline">
             Install
           </a>
-          <a href="#features" className="hidden transition hover:text-fg sm:inline">
+          <a href="/#features" className="hidden transition hover:text-fg sm:inline">
             Features
           </a>
-          <a href="#usage" className="hidden transition hover:text-fg sm:inline">
+          <a href="/#usage" className="hidden transition hover:text-fg sm:inline">
             Usage
+          </a>
+          <a href="/versions" className="hidden transition hover:text-fg sm:inline">
+            Versions
           </a>
           <a
             href={GITHUB_URL}

@@ -22,6 +22,7 @@ The private, offline, dependency-free terminal tool.
 - [x] Tag-triggered release CI + test CI (GitHub Actions)
 - [x] One-line install/uninstall scripts
 - [x] Landing page deployed to Vercel
+- [x] Versions/releases page on the website (auto-updates from GitHub Releases)
 - [x] LICENSE, CHANGELOG, README command reference, full docs
 - [x] Agent tooling: AGENTS.md, skills, test-guardian subagent, pre-commit gate
 
