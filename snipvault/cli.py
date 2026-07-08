@@ -45,9 +45,17 @@ def print_uninstall_help() -> None:
     else:
         print(f"  curl -fsSL {_RAW}/uninstall.sh | sh")
     print()
-    print("This removes the snipvault binary and its PATH entry. Your saved")
-    print("snippets in ~/.snipvault.json are kept - delete that file yourself")
-    print("if you also want to erase your data.")
+    print("That removes the snipvault program and its PATH entry, but KEEPS your")
+    print("saved snippets so you can reinstall later without losing them.")
+    print()
+    print("Your snippets are stored in this one file:")
+    print(f"  {DEFAULT_VAULT}")
+    print("If you also want to erase your snippets, delete that file manually:")
+    if sys.platform == "win32":
+        print(f'  Remove-Item "{DEFAULT_VAULT}"')
+    else:
+        print(f'  rm "{DEFAULT_VAULT}"')
+    print()
     print("(If you installed with pip instead: pip uninstall snipvault)")
 
 
@@ -62,7 +70,11 @@ def print_help() -> None:
         print(f"  {'':<{width}}  $ {example}")
     print()
     print("Notes:")
-    print("  --lang and --tags are optional; tags are comma-separated (tag1,tag2).")
+    print("  --lang and --tags are optional.")
+    print("  Tags can be separated by spaces OR commas - all of these work:")
+    print("    --tags web api db")
+    print("    --tags web,api,db")
+    print('    --tags "web, api, db"')
     print("  Add --vault <path> before any command to use a different vault file.")
 
 

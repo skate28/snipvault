@@ -3,6 +3,12 @@
 All notable changes to Snippet Vault are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## v0.1.6
+
+- `snipvault uninstall` now shows the full path to your snippet file and the
+  exact command to delete it, and makes clear your data is kept by default.
+- `snipvault help` now shows the accepted tag formats (spaces, commas, or both).
+
 ## v0.1.5
 
 - `--tags` now accepts spaces as well as commas, so `--tags web api`,

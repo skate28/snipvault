@@ -28,9 +28,19 @@ pip install git+https://github.com/skate28/snipvault.git
 **Windows:** `irm https://raw.githubusercontent.com/skate28/snipvault/main/uninstall.ps1 | iex`
 **macOS / Linux:** `curl -fsSL https://raw.githubusercontent.com/skate28/snipvault/main/uninstall.sh | sh`
 
-These remove the binary and PATH entry but **leave your saved snippets** at
-`~/.snipvault.json`. Delete that file yourself if you also want to erase your data.
-(If you installed with pip instead: `pip uninstall snipvault`.)
+Not sure of the command? Run `snipvault uninstall` and it prints the exact
+uninstaller for your OS.
+
+These remove the binary and PATH entry but **deliberately keep your saved
+snippets**, so you can reinstall later without losing anything. Your snippets
+live in a single file:
+
+- Windows: `C:\Users\<you>\.snipvault.json`
+- macOS / Linux: `~/.snipvault.json`
+
+If you also want to erase your snippets, delete that file manually
+(`Remove-Item` on Windows, `rm` on macOS/Linux). If you installed with pip
+instead, uninstall with `pip uninstall snipvault`.
 
 ## Usage
 
@@ -48,8 +58,17 @@ Run `snipvault help` (or just `snipvault` with no arguments) any time to see all
 | `uninstall` | Show how to remove Snippet Vault | `snipvault uninstall` |
 | `help` | Show the command list | `snipvault help` |
 
-`--lang` (default `text`) and `--tags` are optional; tags can be separated by
-commas or spaces (`--tags web api` or `--tags web,api` both work).
+`--lang` (default `text`) and `--tags` are optional.
+
+**Tag format** — tags can be separated by spaces *or* commas, so all of these are
+equivalent:
+
+```
+snipvault add "title" "code" --tags web api db
+snipvault add "title" "code" --tags web,api,db
+snipvault add "title" "code" --tags "web, api, db"
+```
+
 Add `--vault <path>` before any command to use a different vault file (handy for
 per-project vaults or testing).
 
