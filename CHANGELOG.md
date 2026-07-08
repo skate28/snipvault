@@ -3,6 +3,12 @@
 All notable changes to Snippet Vault are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## v0.1.5
+
+- `--tags` now accepts spaces as well as commas, so `--tags web api`,
+  `--tags web,api`, and `--tags "web, api"` all work. Previously a space after
+  a comma caused an "unrecognized arguments" error.
+
 ## v0.1.4
 
 - Fixed alignment of the `snipvault help` command list so descriptions line up

@@ -3,9 +3,21 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 
 from .storage import DEFAULT_VAULT, Snippet, Vault
+
+
+def parse_tags(raw: list[str] | None) -> list[str]:
+    """Turn whatever the shell passed to --tags into a clean tag list.
+
+    Accepts commas, spaces, or both: `--tags a,b,c`, `--tags a b c`, and
+    `--tags "a, b, c"` all yield ["a", "b", "c"].
+    """
+    if not raw:
+        return []
+    return [t for t in re.split(r"[,\s]+", " ".join(raw)) if t]
 
 # (command, one-line description, example of exactly what to type)
 COMMANDS = [
@@ -84,7 +96,12 @@ def build_parser() -> argparse.ArgumentParser:
     p_add.add_argument("title")
     p_add.add_argument("code")
     p_add.add_argument("--lang", default="text", help="language (default: text)")
-    p_add.add_argument("--tags", default="", help="comma-separated tags")
+    p_add.add_argument(
+        "--tags",
+        nargs="*",
+        default=None,
+        help="tags separated by commas or spaces, e.g. --tags web api",
+    )
 
     sub.add_parser("list", help="list all snippets")
 
@@ -119,7 +136,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         if args.command == "add":
-            tags = [t for t in args.tags.split(",") if t.strip()]
+            tags = parse_tags(args.tags)
             snippet = vault.add(args.title, args.lang, args.code, tags)
             print(f"added snippet {snippet.id}: {snippet.title}")
         elif args.command == "list":

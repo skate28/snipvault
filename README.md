@@ -48,7 +48,8 @@ Run `snipvault help` (or just `snipvault` with no arguments) any time to see all
 | `uninstall` | Show how to remove Snippet Vault | `snipvault uninstall` |
 | `help` | Show the command list | `snipvault help` |
 
-`--lang` (default `text`) and `--tags` are optional; tags are comma-separated.
+`--lang` (default `text`) and `--tags` are optional; tags can be separated by
+commas or spaces (`--tags web api` or `--tags web,api` both work).
 Add `--vault <path>` before any command to use a different vault file (handy for
 per-project vaults or testing).
 

@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from snipvault.cli import main
+from snipvault.cli import main, parse_tags
 
 
 class CliTests(unittest.TestCase):
@@ -83,6 +83,21 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("Commands:", out)
         self.assertIn("snipvault add", out)
+
+    def test_parse_tags_accepts_commas_spaces_and_both(self):
+        self.assertEqual(parse_tags(["a,b,c"]), ["a", "b", "c"])
+        self.assertEqual(parse_tags(["a", "b", "c"]), ["a", "b", "c"])
+        # PowerShell splitting "a, b, c" into tokens with trailing commas:
+        self.assertEqual(parse_tags(["a,", "b,", "c"]), ["a", "b", "c"])
+        self.assertEqual(parse_tags(["a, b, c"]), ["a", "b", "c"])
+        self.assertEqual(parse_tags(None), [])
+        self.assertEqual(parse_tags([]), [])
+
+    def test_add_with_space_separated_tags(self):
+        code, out, _ = self.run_cli("add", "t", "code", "--tags", "web", "api", "db")
+        self.assertEqual(code, 0)
+        code, out, _ = self.run_cli("search", "api")
+        self.assertIn("t", out)
 
     def test_uninstall_prints_instructions(self):
         code, out, _ = self.run_cli("uninstall")
