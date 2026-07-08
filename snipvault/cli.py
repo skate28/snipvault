@@ -30,7 +30,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--vault", default=str(DEFAULT_VAULT), help="path to the vault JSON file"
     )
-    sub = parser.add_subparsers(dest="command", required=True)
+    sub = parser.add_subparsers(dest="command")
+
+    sub.add_parser("help", help="show this help message")
 
     p_add = sub.add_parser("add", help="add a snippet")
     p_add.add_argument("title")
@@ -53,7 +55,14 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
+
+    # Bare `snipvault` or `snipvault help` prints the full command list.
+    if args.command is None or args.command == "help":
+        parser.print_help()
+        return 0
+
     vault = Vault(args.vault)
 
     try:

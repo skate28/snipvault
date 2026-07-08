@@ -67,6 +67,17 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("(no snippets)", out)
 
+    def test_help_command_lists_all_subcommands(self):
+        code, out, _ = self.run_cli("help")
+        self.assertEqual(code, 0)
+        for cmd in ("add", "list", "show", "search", "rm"):
+            self.assertIn(cmd, out)
+
+    def test_bare_invocation_shows_help(self):
+        code, out, _ = self.run_cli()
+        self.assertEqual(code, 0)
+        self.assertIn("usage: snipvault", out)
+
 
 if __name__ == "__main__":
     unittest.main()

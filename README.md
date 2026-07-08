@@ -34,7 +34,7 @@ These remove the binary and PATH entry but **leave your saved snippets** at
 
 ## Usage
 
-Run from the project root:
+Run `snipvault help` (or just `snipvault` with no arguments) any time to see all commands.
 
 ```
 python -m snipvault add "list comprehension" "[x*2 for x in items]" --lang python --tags loops,python
