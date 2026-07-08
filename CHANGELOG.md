@@ -5,65 +5,72 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## v0.2.2
 
-- **Sessions now work on PowerShell with no setup.** At `end`, commands are read
-  from the PowerShell history file, so `snipvault init` is no longer required on
-  Windows (it stays optional, adding per-command timestamps via a live hook).
-- `snipvault session rm <id>` now works too, alongside `snipvault sessions rm <id>`.
+**Terminal sessions that just work — zero setup.** Record everything you do in the
+terminal without touching a config file. Run `snipvault start`, do your work, then
+`snipvault end` — on Windows PowerShell your commands are captured automatically
+from your shell history. If you tried sessions before and nothing recorded, this
+is the release that makes it effortless.
+
+- Zero-setup command capture on PowerShell (no `snipvault init` needed).
+- Delete a session with `snipvault session rm <id>` as well as `sessions rm <id>`.
 
 ## v0.2.1
 
-- Added `snipvault sessions rm <id>` to delete a recorded session by its id
-  (mirrors `snipvault rm` for snippets). Deleting the active session stops recording.
+**Keep your session list tidy.** Delete any recorded session by id, exactly like
+removing a snippet — and if you delete the one that's currently recording, it stops
+cleanly. A small touch that completes the sessions workflow.
+
+- Added `snipvault sessions rm <id>`.
 
 ## v0.2.0
 
-Adds **terminal sessions** — record the commands you run during a work session
-and review them later. Fully local; no database.
+**The big one: record what you actually did.** Snippet Vault can now capture a whole
+terminal session. `snipvault start "task"` → work → `snipvault end`, then replay a
+clean log of every command you ran. Perfect for write-ups, onboarding notes, or
+remembering exactly how you fixed that thing last week — and it's 100% local and
+offline, like everything else.
 
-- `snipvault start [name]` / `snipvault end` to record a session.
-- `snipvault init` sets up a shell hook (PowerShell/bash/zsh) that logs commands
-  while a session is active — zero overhead otherwise, and it never records your
-  snipvault commands.
-- `snipvault sessions` lists recorded sessions; `snipvault session <id>` prints a
-  timestamped command log.
+- New `start`, `end`, `sessions`, `session`, and `init` commands.
 - Sessions stored locally in `~/.snipvault-sessions.json`.
 
 ## v0.1.6
 
-- `snipvault uninstall` now shows the full path to your snippet file and the
-  exact command to delete it, and makes clear your data is kept by default.
-- `snipvault help` now shows the accepted tag formats (spaces, commas, or both).
+**Nothing hidden about your data.** Uninstall now shows the exact location of your
+snippets and the precise command to delete them, so you're always in control. Help
+displays every accepted tag format at a glance.
 
 ## v0.1.5
 
-- `--tags` now accepts spaces as well as commas, so `--tags web api`,
-  `--tags web,api`, and `--tags "web, api"` all work. Previously a space after
-  a comma caused an "unrecognized arguments" error.
+**Tags that don't fight you.** Type them however feels natural — `--tags web api`,
+`--tags web,api`, or `--tags "web, api"` — they all just work. No more cryptic
+errors from a stray space after a comma.
 
 ## v0.1.4
 
-- Fixed alignment of the `snipvault help` command list so descriptions line up
-  regardless of command-name length.
+**A help screen that reads clean.** The command list now lines up perfectly no
+matter how long the command names get. Small polish, noticeably nicer to scan.
 
 ## v0.1.3
 
-- Added a `snipvault uninstall` command that prints the exact OS-specific
-  removal command (a running binary can't reliably delete itself).
+**Uninstall in one command.** Type `snipvault uninstall` and get the exact,
+OS-correct removal steps — no digging through docs.
 
 ## v0.1.2
 
-- `snipvault help` (and bare `snipvault`) now print a friendly command list with a
-  copy-paste example for each command, plus notes on optional flags.
-- Help text is ASCII-only to avoid Windows console encoding issues.
+**Never guess the syntax again.** `snipvault help` now prints a copy-paste example
+for every command, right next to what it does.
 
 ## v0.1.1
 
-- Added a `help` command; bare `snipvault` now shows help instead of an error.
+**Friendly from the first keystroke.** `snipvault help` and a bare `snipvault` now
+show the full command list instead of an error.
 
 ## v0.1.0
 
-- First release: `add`, `list`, `show`, `search`, and `rm` commands backed by a
-  local JSON vault (`~/.snipvault.json`).
-- Prebuilt single-file binaries for Windows, macOS, and Linux.
-- One-line install/uninstall scripts and a `pip install` from source option.
-- Landing page with OS-detected downloads.
+**Your code snippets, one command away.** The first release: a tiny, dependency-free,
+fully offline snippet manager for your terminal. Save a command once, search it
+forever. Ships as a single-file binary for Windows, macOS, and Linux — no Python, no
+setup, no account. Stop re-Googling the commands you already figured out.
+
+- Core commands: `add`, `list`, `show`, `search`, `rm`.
+- One-line install/uninstall scripts and prebuilt binaries for all three platforms.

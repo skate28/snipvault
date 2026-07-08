@@ -48,13 +48,31 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         with:
           path: binaries
           merge-multiple: true
 
+      - name: Build release notes from CHANGELOG
+        shell: bash
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          # Pull the section for this tag (lines after "## <tag>" up to the next "## ").
+          awk -v v="## $tag" '$0==v{f=1;next} /^## /{if(f)exit} f{print}' \
+            CHANGELOG.md > NOTES.md
+          if [ ! -s NOTES.md ]; then
+            echo "See the full changelog for details." > NOTES.md
+          fi
+          {
+            echo ""
+            echo "---"
+            echo "**Download** the binary for your OS below, or install in one line — see the [README](https://github.com/skate28/snipvault#install). Full history in the [changelog](https://github.com/skate28/snipvault/blob/main/CHANGELOG.md)."
+          } >> NOTES.md
+
       - name: Create GitHub Release with binaries
         uses: softprops/action-gh-release@v2
         with:
           files: binaries/*
-          generate_release_notes: true
+          body_path: NOTES.md
