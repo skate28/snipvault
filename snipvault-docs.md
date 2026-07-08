@@ -64,7 +64,19 @@ Notes:
 - On macOS/Linux, if `pip install` complains about an externally managed environment,
   use [pipx](https://pipx.pypa.io) instead: `pipx install path/to/snippet-vault`.
 - After installing, the `snipvault` command works from **any** directory.
-- To uninstall: `python -m pip uninstall snipvault`.
+
+### Uninstall
+
+If you used a one-line installer, use the matching uninstaller:
+
+- **Windows:** `irm https://raw.githubusercontent.com/skate28/snipvault/main/uninstall.ps1 | iex`
+  Removes `%LOCALAPPDATA%\snipvault\bin` and its PATH entry.
+- **macOS / Linux:** `curl -fsSL https://raw.githubusercontent.com/skate28/snipvault/main/uninstall.sh | sh`
+  Removes `~/.local/bin/snipvault`.
+
+Both **leave your snippets** at `~/.snipvault.json` — delete that file yourself to
+erase your data. If you installed from source with pip, uninstall with
+`python -m pip uninstall snipvault`.
 
 ---
 

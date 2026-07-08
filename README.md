@@ -23,6 +23,15 @@ or install from source with pip:
 pip install git+https://github.com/skate28/snipvault.git
 ```
 
+### Uninstall
+
+**Windows:** `irm https://raw.githubusercontent.com/skate28/snipvault/main/uninstall.ps1 | iex`
+**macOS / Linux:** `curl -fsSL https://raw.githubusercontent.com/skate28/snipvault/main/uninstall.sh | sh`
+
+These remove the binary and PATH entry but **leave your saved snippets** at
+`~/.snipvault.json`. Delete that file yourself if you also want to erase your data.
+(If you installed with pip instead: `pip uninstall snipvault`.)
+
 ## Usage
 
 Run from the project root:
