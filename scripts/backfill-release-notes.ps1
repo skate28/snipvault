@@ -14,7 +14,9 @@
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path $PSScriptRoot -Parent
-$changelog = Get-Content (Join-Path $repoRoot "CHANGELOG.md") -Raw
+# -Encoding UTF8 is required: PowerShell 5.1 otherwise reads the BOM-less
+# UTF-8 changelog as ANSI and garbles em-dashes and other non-ASCII characters.
+$changelog = Get-Content (Join-Path $repoRoot "CHANGELOG.md") -Raw -Encoding UTF8
 
 $footer = @"
 
