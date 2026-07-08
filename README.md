@@ -93,20 +93,10 @@ can back up, sync, or edit by hand.
 ## Terminal sessions
 
 Snippet Vault can record the commands you run during a work session so you can
-review exactly what you did later. Recording only happens between `start` and
-`end` — nothing is captured otherwise, and it's all stored locally in
+review exactly what you did later. Everything is stored locally in
 `~/.snipvault-sessions.json`.
 
-**One-time setup** (adds a hook to your shell):
-
-```
-snipvault init
-```
-
-Follow the printed instructions (add one line to your PowerShell profile,
-`~/.bashrc`, or `~/.zshrc`), then open a new terminal.
-
-**Then, whenever you want to record:**
+**On Windows PowerShell it works with no setup** — just start and stop:
 
 ```
 snipvault start "deploy work"    # begin recording
@@ -114,24 +104,34 @@ snipvault start "deploy work"    # begin recording
 snipvault end                    # stop and save
 
 snipvault sessions               # list recorded sessions
-snipvault session 1              # show a timestamped command log
-snipvault sessions rm 1          # delete a session by its id
+snipvault session 1              # show the command log
+snipvault session rm 1           # delete a session (or: sessions rm 1)
 ```
+
+At `end`, Snippet Vault reads the commands you ran from your shell history and
+saves them to the session (skipping its own commands).
 
 Example log:
 
 ```
 Session: "deploy work"  (id 1)
-Started: 2026-07-07 21:30:12
-Ended:   2026-07-07 22:05:44   (35m 32s)
+Started: 2026-07-08 21:30:12
+Ended:   2026-07-08 22:05:44   (35m 32s)
 
-  21:30:15  git status
-  21:30:40  npm run build
-  21:31:02  git commit -m "ship"
+  git status
+  npm run build
+  git commit -m "ship"
 ```
 
-> Note: a session log records the command lines you type, which can include
-> secrets passed as arguments. Everything stays on your machine in this version.
+**Optional — per-command timestamps (any shell):** run `snipvault init` and add
+the printed line to your shell profile. With the hook active, commands are
+recorded live *with* timestamps as you run them. On macOS/Linux this hook is how
+capture works, so run `snipvault init` there.
+
+> Note: a session records the command lines you type, which can include secrets
+> passed as arguments. Everything stays on your machine in this version. Also,
+> the PowerShell history is shared across windows, so commands run in another
+> window during a session may be included.
 
 ## Project layout
 

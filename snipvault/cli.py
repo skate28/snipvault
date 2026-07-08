@@ -6,6 +6,7 @@ import argparse
 import os
 import re
 import sys
+from pathlib import Path
 
 from .sessions import DEFAULT_SESSIONS, Session, SessionStore
 from .storage import DEFAULT_VAULT, Snippet, Vault
@@ -137,8 +138,11 @@ def _print_session(s: Session) -> None:
         print("  (no commands recorded)")
         return
     for c in s.commands:
-        clock = c.timestamp.split("T")[-1]
-        print(f"  {clock}  {c.text}")
+        if c.timestamp:
+            clock = c.timestamp.split("T")[-1]
+            print(f"  {clock}  {c.text}")
+        else:
+            print(f"  {c.text}")
 
 
 def _shell_hook(shell: str, flag_path: str) -> str:
@@ -228,6 +232,49 @@ def print_init(shell: str | None, flag_path: str) -> None:
     print("\nRecording only happens between start and end - nothing is captured otherwise.")
 
 
+def _history_path():
+    """Path to the shell history file we read for zero-setup capture.
+
+    Overridable via SNIPVAULT_HISTORY_FILE (used in tests). On Windows this is
+    the PSReadLine history file, which PowerShell updates after every command.
+    """
+    override = os.environ.get("SNIPVAULT_HISTORY_FILE")
+    if override:
+        return Path(override)
+    if sys.platform == "win32":
+        appdata = os.environ.get("APPDATA")
+        if appdata:
+            return (
+                Path(appdata)
+                / "Microsoft"
+                / "Windows"
+                / "PowerShell"
+                / "PSReadLine"
+                / "ConsoleHost_history.txt"
+            )
+    return None
+
+
+def _history_line_count() -> int | None:
+    p = _history_path()
+    if p and p.exists():
+        return len(p.read_text(encoding="utf-8", errors="ignore").splitlines())
+    return None
+
+
+def _history_commands_since(marker: int | None) -> list[str]:
+    """Commands added to the history file since `marker`, minus snipvault's own."""
+    p = _history_path()
+    if p is None or not p.exists() or marker is None:
+        return []
+    lines = p.read_text(encoding="utf-8", errors="ignore").splitlines()
+    new = lines[marker:]
+    return [
+        line for line in new
+        if line.strip() and not line.strip().startswith("snipvault")
+    ]
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="snipvault", description="Store and retrieve code snippets locally."
@@ -278,7 +325,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_sessions.add_argument("id", nargs="?", type=int, help="session id to remove")
 
     p_session = sub.add_parser("session", help="show a session's command log by id")
-    p_session.add_argument("id", type=int)
+    # Accept both `session <id>` (show) and `session rm <id>` (delete).
+    p_session.add_argument("id", help="session id, or 'rm' to delete")
+    p_session.add_argument("extra", nargs="?", help="session id when using 'rm'")
 
     p_init = sub.add_parser("init", help="set up shell recording")
     p_init.add_argument(
@@ -327,14 +376,24 @@ def main(argv: list[str] | None = None) -> int:
         sessions = SessionStore(args.sessions)
         try:
             if args.command == "start":
-                s = sessions.start(args.name)
+                s = sessions.start(args.name, marker=_history_line_count())
                 print(f'started session {s.id}: "{s.name}" (recording)')
             elif args.command == "end":
+                active = sessions.active_session()
+                # If nothing was recorded live (no shell hook), backfill the
+                # commands from the shell history file.
+                if active is not None and not active.commands:
+                    sessions.backfill(_history_commands_since(active.start_marker))
                 s = sessions.end()
                 print(
                     f'ended session {s.id}: "{s.name}" - '
                     f"{len(s.commands)} commands in {_fmt_duration(s.duration_seconds())}"
                 )
+                if not s.commands and _history_path() is None:
+                    print(
+                        "(no commands captured - run 'snipvault init' to enable "
+                        "recording on this shell)"
+                    )
                 print(f"View it with:  snipvault session {s.id}")
             elif args.command == "sessions":
                 if args.action == "rm":
@@ -349,7 +408,14 @@ def main(argv: list[str] | None = None) -> int:
                 else:
                     _print_sessions(sessions.all())
             elif args.command == "session":
-                _print_session(sessions.get(args.id))
+                if args.id == "rm":
+                    if args.extra is None:
+                        print("error: usage: snipvault session rm <id>", file=sys.stderr)
+                        return 1
+                    s = sessions.remove(int(args.extra))
+                    print(f'removed session {s.id}: "{s.name}"')
+                else:
+                    _print_session(sessions.get(int(args.id)))
         except (ValueError, KeyError) as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 1

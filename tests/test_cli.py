@@ -138,6 +138,35 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("no session with id 999", err)
 
+    def test_session_backfills_from_history_file(self):
+        import os
+
+        hist = str(Path(self.tmpdir.name) / "history.txt")
+        Path(hist).write_text("pre-existing line\n", encoding="utf-8")
+        os.environ["SNIPVAULT_HISTORY_FILE"] = hist
+        self.addCleanup(os.environ.pop, "SNIPVAULT_HISTORY_FILE", None)
+
+        self.run_cli("start", "auto")
+        # Simulate the shell appending commands to its history file.
+        with open(hist, "a", encoding="utf-8") as f:
+            f.write("git status\nsnipvault sessions\nnpm test\n")
+        code, out, _ = self.run_cli("end")
+        self.assertEqual(code, 0)
+        self.assertIn("2 commands", out)  # snipvault line excluded
+
+        code, out, _ = self.run_cli("session", "1")
+        self.assertIn("git status", out)
+        self.assertIn("npm test", out)
+        self.assertNotIn("snipvault sessions", out)
+        self.assertNotIn("pre-existing line", out)
+
+    def test_session_rm_singular_form(self):
+        self.run_cli("start", "x")
+        self.run_cli("end")
+        code, out, _ = self.run_cli("session", "rm", "1")
+        self.assertEqual(code, 0)
+        self.assertIn("removed session 1", out)
+
     def test_end_without_start_errors(self):
         code, _, err = self.run_cli("end")
         self.assertEqual(code, 1)

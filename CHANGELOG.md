@@ -3,6 +3,13 @@
 All notable changes to Snippet Vault are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## v0.2.2
+
+- **Sessions now work on PowerShell with no setup.** At `end`, commands are read
+  from the PowerShell history file, so `snipvault init` is no longer required on
+  Windows (it stays optional, adding per-command timestamps via a live hook).
+- `snipvault session rm <id>` now works too, alongside `snipvault sessions rm <id>`.
+
 ## v0.2.1
 
 - Added `snipvault sessions rm <id>` to delete a recorded session by its id

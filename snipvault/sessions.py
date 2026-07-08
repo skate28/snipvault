@@ -49,6 +49,9 @@ class Session:
     started: str
     ended: str | None = None
     commands: list[Command] = field(default_factory=list)
+    # Number of lines in the shell history file when the session started, used
+    # to backfill commands at `end` when no live hook was recording.
+    start_marker: int | None = None
 
     def duration_seconds(self) -> int | None:
         """Seconds between start and end, or None if still active."""
@@ -83,6 +86,7 @@ class SessionStore:
                 started=item["started"],
                 ended=item.get("ended"),
                 commands=[Command(**c) for c in item.get("commands", [])],
+                start_marker=item.get("start_marker"),
             )
             for item in raw.get("sessions", [])
         ]
@@ -107,7 +111,7 @@ class SessionStore:
                 return s
         return None
 
-    def start(self, name: str = "") -> Session:
+    def start(self, name: str = "", marker: int | None = None) -> Session:
         if self.active_session() is not None:
             raise ValueError(
                 "a session is already active; run 'snipvault end' first"
@@ -116,12 +120,26 @@ class SessionStore:
             id=self._next_id(),
             name=name.strip() or "session",
             started=_now(),
+            start_marker=marker,
         )
         self.sessions.append(session)
         self.active = session.id
         self._save()
         self.flag_path.write_text(str(session.id), encoding="utf-8")
         return session
+
+    def backfill(self, texts: list[str]) -> int:
+        """Populate the active session's commands from a list (no timestamps).
+
+        Used at `end` to capture commands from the shell history file when no
+        live hook recorded them. No-op if commands were already recorded live.
+        """
+        session = self.active_session()
+        if session is None or session.commands:
+            return 0
+        session.commands = [Command(text=t, timestamp="") for t in texts]
+        self._save()
+        return len(session.commands)
 
     def record(self, text: str) -> bool:
         """Append a command to the active session. No-op if none is active.
