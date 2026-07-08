@@ -90,6 +90,48 @@ Remove-Item -Recurse -Force path
 Snippets are stored in a single JSON file at `~/.snipvault.json` — plain text you
 can back up, sync, or edit by hand.
 
+## Terminal sessions
+
+Snippet Vault can record the commands you run during a work session so you can
+review exactly what you did later. Recording only happens between `start` and
+`end` — nothing is captured otherwise, and it's all stored locally in
+`~/.snipvault-sessions.json`.
+
+**One-time setup** (adds a hook to your shell):
+
+```
+snipvault init
+```
+
+Follow the printed instructions (add one line to your PowerShell profile,
+`~/.bashrc`, or `~/.zshrc`), then open a new terminal.
+
+**Then, whenever you want to record:**
+
+```
+snipvault start "deploy work"    # begin recording
+# ... run your commands ...
+snipvault end                    # stop and save
+
+snipvault sessions               # list recorded sessions
+snipvault session 1              # show a timestamped command log
+```
+
+Example log:
+
+```
+Session: "deploy work"  (id 1)
+Started: 2026-07-07 21:30:12
+Ended:   2026-07-07 22:05:44   (35m 32s)
+
+  21:30:15  git status
+  21:30:40  npm run build
+  21:31:02  git commit -m "ship"
+```
+
+> Note: a session log records the command lines you type, which can include
+> secrets passed as arguments. Everything stays on your machine in this version.
+
 ## Project layout
 
 ```

@@ -25,14 +25,19 @@ Package: `snipvault/`. Tests: `tests/`. Full docs: `snipvault-docs.md`.
 - Tests use **unittest**, never pytest. No mocking/fixtures libraries.
 - Tests must **never touch the real `~/.snipvault.json`** — always use temp vaults
   via `tempfile.TemporaryDirectory` with `addCleanup` (see existing tests).
-- The version lives in **two places** that must stay in sync:
-  `pyproject.toml` and `snipvault/__init__.py`.
+  The same rule applies to the sessions file `~/.snipvault-sessions.json` — pass
+  `--sessions <temp>` (the `run_cli` helper already does).
+- The version lives in **three places** that must stay in sync:
+  `pyproject.toml`, `snipvault/__init__.py`, and `website/app/lib/site.ts`.
 
 ## Architecture & conventions
 
-- `storage.py` is the data layer (Snippet dataclass + Vault); `cli.py` is
-  presentation (argparse + printing). Keep that separation — no printing from
-  storage, no JSON handling in cli.
+- `storage.py` (snippets → `Vault`) and `sessions.py` (recorded sessions →
+  `SessionStore`) are the data layers; `cli.py` is presentation (argparse +
+  printing). Keep that separation — no printing from the data layers, no JSON
+  handling in cli. Both stores take an injectable path for testing.
+- `_record` is a hidden command called by the shell hook after each command; it
+  must stay silent, fast, and never fail the shell (always exit 0).
 - CLI tests call `main()` in-process through the `run_cli` helper in
   `tests/test_cli.py` — never spawn a subprocess.
 - One behavior per test method; descriptive snake_case names stating the

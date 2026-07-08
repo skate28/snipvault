@@ -1,7 +1,7 @@
 // Central config for the landing page. Update REPO / VERSION here only.
 
 export const REPO = "skate28/snipvault";
-export const VERSION = "v0.1.6";
+export const VERSION = "v0.2.0";
 export const GITHUB_URL = `https://github.com/${REPO}`;
 
 const releaseBase = `${GITHUB_URL}/releases/latest/download`;

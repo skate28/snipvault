@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 
+from .sessions import DEFAULT_SESSIONS, Session, SessionStore
 from .storage import DEFAULT_VAULT, Snippet, Vault
 
 
@@ -26,6 +28,11 @@ COMMANDS = [
     ("search", "Search titles, languages, tags, and code", "snipvault search keyword"),
     ("show", "Print a snippet's code by its id", "snipvault show 1"),
     ("rm", "Delete a snippet by its id", "snipvault rm 1"),
+    ("start", "Start recording a terminal session", 'snipvault start "deploy work"'),
+    ("end", "Stop recording the active session", "snipvault end"),
+    ("sessions", "List your recorded sessions", "snipvault sessions"),
+    ("session", "Show a session's command log by id", "snipvault session 1"),
+    ("init", "Set up shell recording (run once)", "snipvault init"),
     ("uninstall", "Show how to remove Snippet Vault", "snipvault uninstall"),
     ("help", "Show this help message", "snipvault help"),
 ]
@@ -93,12 +100,144 @@ def _print_table(snippets: list[Snippet]) -> None:
         print(_format_row(s))
 
 
+def _fmt_duration(seconds: int | None) -> str:
+    if seconds is None:
+        return "active"
+    h, rem = divmod(seconds, 3600)
+    m, s = divmod(rem, 60)
+    if h:
+        return f"{h}h {m}m"
+    if m:
+        return f"{m}m {s}s"
+    return f"{s}s"
+
+
+def _print_sessions(sessions: list[Session]) -> None:
+    if not sessions:
+        print("(no sessions yet - run 'snipvault start' to record one)")
+        return
+    print(f"{'id':>4}  {'name':<24}  {'started':<19}  {'duration':>9}  cmds")
+    print("-" * 74)
+    for s in sessions:
+        started = s.started.replace("T", " ")
+        dur = _fmt_duration(s.duration_seconds())
+        print(f"{s.id:>4}  {s.name:<24.24}  {started:<19}  {dur:>9}  {len(s.commands)}")
+
+
+def _print_session(s: Session) -> None:
+    print(f'Session: "{s.name}"  (id {s.id})')
+    print(f"Started: {s.started.replace('T', ' ')}")
+    if s.ended:
+        print(f"Ended:   {s.ended.replace('T', ' ')}   ({_fmt_duration(s.duration_seconds())})")
+    else:
+        print("Ended:   (still recording)")
+    print()
+    if not s.commands:
+        print("  (no commands recorded)")
+        return
+    for c in s.commands:
+        clock = c.timestamp.split("T")[-1]
+        print(f"  {clock}  {c.text}")
+
+
+def _shell_hook(shell: str, flag_path: str) -> str:
+    """Return the recording hook script for the given shell.
+
+    The hook only does work while a session is active (the flag file exists),
+    and never records snipvault's own commands.
+    """
+    if shell == "powershell":
+        return f'''# snipvault session recording hook
+$global:__snipvault_flag = "{flag_path}"
+if (-not $global:__snipvault_orig_prompt) {{
+    $global:__snipvault_orig_prompt = $function:prompt
+}}
+$global:__snipvault_last = -1
+function global:prompt {{
+    if (Test-Path $global:__snipvault_flag) {{
+        $h = Get-History -Count 1
+        if ($h -and $h.Id -ne $global:__snipvault_last) {{
+            $global:__snipvault_last = $h.Id
+            $line = $h.CommandLine
+            if ($line -and -not $line.StartsWith("snipvault")) {{
+                snipvault _record "$line" | Out-Null
+            }}
+        }}
+    }}
+    & $global:__snipvault_orig_prompt
+}}'''
+    if shell == "bash":
+        return f'''# snipvault session recording hook
+__snipvault_flag="{flag_path}"
+__snipvault_record() {{
+    [ -f "$__snipvault_flag" ] || return
+    local line
+    line=$(history 1 | sed 's/^ *[0-9]* *//')
+    case "$line" in snipvault*) return;; esac
+    snipvault _record "$line" >/dev/null 2>&1
+}}
+case "$PROMPT_COMMAND" in
+    *__snipvault_record*) ;;
+    *) PROMPT_COMMAND="__snipvault_record;${{PROMPT_COMMAND}}" ;;
+esac'''
+    # zsh
+    return f'''# snipvault session recording hook
+__snipvault_flag="{flag_path}"
+__snipvault_record() {{
+    [ -f "$__snipvault_flag" ] || return
+    local line="${{1%%$'\\n'}}"
+    case "$line" in snipvault*) return;; esac
+    snipvault _record "$line" >/dev/null 2>&1
+}}
+autoload -Uz add-zsh-hook 2>/dev/null
+add-zsh-hook preexec __snipvault_record 2>/dev/null'''
+
+
+def _detect_shell() -> str:
+    if sys.platform == "win32":
+        return "powershell"
+    return "zsh" if os.environ.get("SHELL", "").endswith("zsh") else "bash"
+
+
+def print_init(shell: str | None, flag_path: str) -> None:
+    """Print the one-time setup for shell recording.
+
+    With an explicit shell, print the raw hook script (for a profile to eval).
+    Without one, print friendly instructions for the detected shell.
+    """
+    if shell:
+        print(_shell_hook(shell, flag_path))
+        return
+
+    detected = _detect_shell()
+    print("Set up Snippet Vault session recording (one-time):\n")
+    if detected == "powershell":
+        print("  Add this line to your PowerShell profile ($PROFILE):\n")
+        print("    Invoke-Expression (& snipvault init powershell | Out-String)\n")
+        print("  Open the profile with:  notepad $PROFILE")
+    elif detected == "zsh":
+        print("  Add this line to ~/.zshrc:\n")
+        print('    eval "$(snipvault init zsh)"\n')
+    else:
+        print("  Add this line to ~/.bashrc:\n")
+        print('    eval "$(snipvault init bash)"\n')
+    print("Then open a NEW terminal. After that, use:")
+    print('  snipvault start "my task"   # begin recording')
+    print("  snipvault end               # stop and save")
+    print("\nRecording only happens between start and end - nothing is captured otherwise.")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="snipvault", description="Store and retrieve code snippets locally."
     )
     parser.add_argument(
         "--vault", default=str(DEFAULT_VAULT), help="path to the vault JSON file"
+    )
+    parser.add_argument(
+        "--sessions",
+        default=str(DEFAULT_SESSIONS),
+        help="path to the sessions JSON file",
     )
     sub = parser.add_subparsers(dest="command")
 
@@ -126,6 +265,26 @@ def build_parser() -> argparse.ArgumentParser:
     p_rm = sub.add_parser("rm", help="delete a snippet by id")
     p_rm.add_argument("id", type=int)
 
+    p_start = sub.add_parser("start", help="start recording a terminal session")
+    p_start.add_argument("name", nargs="?", default="", help="optional session name")
+
+    sub.add_parser("end", help="stop recording the active session")
+    sub.add_parser("sessions", help="list recorded sessions")
+
+    p_session = sub.add_parser("session", help="show a session's command log by id")
+    p_session.add_argument("id", type=int)
+
+    p_init = sub.add_parser("init", help="set up shell recording")
+    p_init.add_argument(
+        "shell",
+        nargs="?",
+        choices=["powershell", "bash", "zsh"],
+        help="print the raw hook for this shell (used by your profile)",
+    )
+
+    p_record = sub.add_parser("_record", help=argparse.SUPPRESS)
+    p_record.add_argument("text", nargs=argparse.REMAINDER)
+
     sub.add_parser("uninstall", help="show how to remove Snippet Vault")
 
     return parser
@@ -142,6 +301,42 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "uninstall":
         print_uninstall_help()
+        return 0
+
+    if args.command == "init":
+        store = SessionStore(args.sessions)
+        print_init(args.shell, str(store.flag_path))
+        return 0
+
+    # Hidden command the shell hook calls after each command. Must be silent,
+    # fast, and never fail the shell (always exit 0).
+    if args.command == "_record":
+        try:
+            SessionStore(args.sessions).record(" ".join(args.text))
+        except Exception:
+            pass
+        return 0
+
+    if args.command in ("start", "end", "sessions", "session"):
+        sessions = SessionStore(args.sessions)
+        try:
+            if args.command == "start":
+                s = sessions.start(args.name)
+                print(f'started session {s.id}: "{s.name}" (recording)')
+            elif args.command == "end":
+                s = sessions.end()
+                print(
+                    f'ended session {s.id}: "{s.name}" - '
+                    f"{len(s.commands)} commands in {_fmt_duration(s.duration_seconds())}"
+                )
+                print(f"View it with:  snipvault session {s.id}")
+            elif args.command == "sessions":
+                _print_sessions(sessions.all())
+            elif args.command == "session":
+                _print_session(sessions.get(args.id))
+        except (ValueError, KeyError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 1
         return 0
 
     vault = Vault(args.vault)

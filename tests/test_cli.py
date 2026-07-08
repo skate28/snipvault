@@ -12,11 +12,14 @@ class CliTests(unittest.TestCase):
         self.tmpdir = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmpdir.cleanup)
         self.vault_path = str(Path(self.tmpdir.name) / "vault.json")
+        self.sessions_path = str(Path(self.tmpdir.name) / "sessions.json")
 
     def run_cli(self, *args):
         out, err = io.StringIO(), io.StringIO()
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
-            code = main(["--vault", self.vault_path, *args])
+            code = main(
+                ["--vault", self.vault_path, "--sessions", self.sessions_path, *args]
+            )
         return code, out.getvalue(), err.getvalue()
 
     def test_add_then_list(self):
@@ -98,6 +101,55 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 0)
         code, out, _ = self.run_cli("search", "api")
         self.assertIn("t", out)
+
+    def test_session_lifecycle_start_record_end_show(self):
+        code, out, _ = self.run_cli("start", "deploy")
+        self.assertEqual(code, 0)
+        self.assertIn("started session 1", out)
+
+        # Simulate the shell hook reporting commands.
+        self.run_cli("_record", "git", "status")
+        self.run_cli("_record", "npm", "run", "build")
+
+        code, out, _ = self.run_cli("end")
+        self.assertEqual(code, 0)
+        self.assertIn("ended session 1", out)
+        self.assertIn("2 commands", out)
+
+        code, out, _ = self.run_cli("session", "1")
+        self.assertEqual(code, 0)
+        self.assertIn("git status", out)
+        self.assertIn("npm run build", out)
+
+        code, out, _ = self.run_cli("sessions")
+        self.assertIn("deploy", out)
+
+    def test_end_without_start_errors(self):
+        code, _, err = self.run_cli("end")
+        self.assertEqual(code, 1)
+        self.assertIn("no active session", err)
+
+    def test_record_without_session_is_silent_and_ok(self):
+        code, out, err = self.run_cli("_record", "git", "status")
+        self.assertEqual(code, 0)
+        self.assertEqual(out, "")
+        self.assertEqual(err, "")
+
+    def test_sessions_empty(self):
+        code, out, _ = self.run_cli("sessions")
+        self.assertEqual(code, 0)
+        self.assertIn("no sessions", out)
+
+    def test_init_powershell_prints_hook(self):
+        code, out, _ = self.run_cli("init", "powershell")
+        self.assertEqual(code, 0)
+        self.assertIn("snipvault _record", out)
+        self.assertIn("__snipvault_flag", out)
+
+    def test_help_lists_session_commands(self):
+        code, out, _ = self.run_cli("help")
+        for cmd in ("start", "end", "sessions", "session", "init"):
+            self.assertIn(cmd, out)
 
     def test_uninstall_prints_instructions(self):
         code, out, _ = self.run_cli("uninstall")

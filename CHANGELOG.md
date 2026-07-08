@@ -3,6 +3,19 @@
 All notable changes to Snippet Vault are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## v0.2.0
+
+Adds **terminal sessions** — record the commands you run during a work session
+and review them later. Fully local; no database.
+
+- `snipvault start [name]` / `snipvault end` to record a session.
+- `snipvault init` sets up a shell hook (PowerShell/bash/zsh) that logs commands
+  while a session is active — zero overhead otherwise, and it never records your
+  snipvault commands.
+- `snipvault sessions` lists recorded sessions; `snipvault session <id>` prints a
+  timestamped command log.
+- Sessions stored locally in `~/.snipvault-sessions.json`.
+
 ## v0.1.6
 
 - `snipvault uninstall` now shows the full path to your snippet file and the
