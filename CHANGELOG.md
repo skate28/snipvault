@@ -3,6 +3,11 @@
 All notable changes to Snippet Vault are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## v0.1.4
+
+- Fixed alignment of the `snipvault help` command list so descriptions line up
+  regardless of command-name length.
+
 ## v0.1.3
 
 - Added a `snipvault uninstall` command that prints the exact OS-specific

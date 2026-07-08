@@ -44,9 +44,10 @@ def print_help() -> None:
     print("snipvault - store and retrieve code snippets locally\n")
     print("Usage: snipvault <command> [options]\n")
     print("Commands:")
+    width = max(len(name) for name, _, _ in COMMANDS)
     for name, desc, example in COMMANDS:
-        print(f"  {name:<7} {desc}")
-        print(f"          $ {example}")
+        print(f"  {name:<{width}}  {desc}")
+        print(f"  {'':<{width}}  $ {example}")
     print()
     print("Notes:")
     print("  --lang and --tags are optional; tags are comma-separated (tag1,tag2).")
