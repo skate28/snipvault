@@ -73,6 +73,23 @@ class SessionStoreTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.store.get(42)
 
+    def test_remove_deletes_and_persists(self):
+        self.store.start("gone")
+        self.store.end()
+        removed = self.store.remove(1)
+        self.assertEqual(removed.name, "gone")
+        self.assertEqual(SessionStore(self.path).all(), [])
+
+    def test_remove_missing_raises(self):
+        with self.assertRaises(KeyError):
+            self.store.remove(99)
+
+    def test_remove_active_session_stops_recording(self):
+        self.store.start("live")
+        self.store.remove(1)
+        self.assertIsNone(self.store.active)
+        self.assertFalse(self.store.flag_path.exists())
+
     def test_ids_increment_across_sessions(self):
         self.store.start("a")
         self.store.end()

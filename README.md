@@ -115,6 +115,7 @@ snipvault end                    # stop and save
 
 snipvault sessions               # list recorded sessions
 snipvault session 1              # show a timestamped command log
+snipvault sessions rm 1          # delete a session by its id
 ```
 
 Example log:

@@ -3,6 +3,11 @@
 All notable changes to Snippet Vault are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## v0.2.1
+
+- Added `snipvault sessions rm <id>` to delete a recorded session by its id
+  (mirrors `snipvault rm` for snippets). Deleting the active session stops recording.
+
 ## v0.2.0
 
 Adds **terminal sessions** — record the commands you run during a work session

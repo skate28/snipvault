@@ -124,6 +124,20 @@ class CliTests(unittest.TestCase):
         code, out, _ = self.run_cli("sessions")
         self.assertIn("deploy", out)
 
+    def test_sessions_rm_deletes_by_id(self):
+        self.run_cli("start", "throwaway")
+        self.run_cli("end")
+        code, out, _ = self.run_cli("sessions", "rm", "1")
+        self.assertEqual(code, 0)
+        self.assertIn("removed session 1", out)
+        code, out, _ = self.run_cli("sessions")
+        self.assertIn("no sessions", out)
+
+    def test_sessions_rm_missing_id_errors(self):
+        code, _, err = self.run_cli("sessions", "rm", "999")
+        self.assertEqual(code, 1)
+        self.assertIn("no session with id 999", err)
+
     def test_end_without_start_errors(self):
         code, _, err = self.run_cli("end")
         self.assertEqual(code, 1)

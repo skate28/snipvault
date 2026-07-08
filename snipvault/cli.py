@@ -31,6 +31,7 @@ COMMANDS = [
     ("start", "Start recording a terminal session", 'snipvault start "deploy work"'),
     ("end", "Stop recording the active session", "snipvault end"),
     ("sessions", "List your recorded sessions", "snipvault sessions"),
+    ("sessions rm", "Delete a recorded session by its id", "snipvault sessions rm 1"),
     ("session", "Show a session's command log by id", "snipvault session 1"),
     ("init", "Set up shell recording (run once)", "snipvault init"),
     ("uninstall", "Show how to remove Snippet Vault", "snipvault uninstall"),
@@ -269,7 +270,12 @@ def build_parser() -> argparse.ArgumentParser:
     p_start.add_argument("name", nargs="?", default="", help="optional session name")
 
     sub.add_parser("end", help="stop recording the active session")
-    sub.add_parser("sessions", help="list recorded sessions")
+
+    p_sessions = sub.add_parser("sessions", help="list or remove recorded sessions")
+    p_sessions.add_argument(
+        "action", nargs="?", choices=["rm"], help="'rm' to delete a session"
+    )
+    p_sessions.add_argument("id", nargs="?", type=int, help="session id to remove")
 
     p_session = sub.add_parser("session", help="show a session's command log by id")
     p_session.add_argument("id", type=int)
@@ -331,7 +337,17 @@ def main(argv: list[str] | None = None) -> int:
                 )
                 print(f"View it with:  snipvault session {s.id}")
             elif args.command == "sessions":
-                _print_sessions(sessions.all())
+                if args.action == "rm":
+                    if args.id is None:
+                        print(
+                            "error: usage: snipvault sessions rm <id>",
+                            file=sys.stderr,
+                        )
+                        return 1
+                    s = sessions.remove(args.id)
+                    print(f'removed session {s.id}: "{s.name}"')
+                else:
+                    _print_sessions(sessions.all())
             elif args.command == "session":
                 _print_session(sessions.get(args.id))
         except (ValueError, KeyError) as exc:

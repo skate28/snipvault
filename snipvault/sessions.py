@@ -153,5 +153,16 @@ class SessionStore:
                 return s
         raise KeyError(f"no session with id {session_id}")
 
+    def remove(self, session_id: int) -> Session:
+        session = self.get(session_id)
+        self.sessions.remove(session)
+        # If we deleted the session that was recording, stop recording.
+        if self.active == session_id:
+            self.active = None
+            if self.flag_path.exists():
+                self.flag_path.unlink()
+        self._save()
+        return session
+
     def all(self) -> list[Session]:
         return list(self.sessions)
