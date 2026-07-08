@@ -32,8 +32,8 @@ The private, offline, dependency-free terminal tool.
 - [x] Shell-hook command capture (`snipvault init` + hidden `_record`)
 - [x] `snipvault sessions` (list) + `snipvault session <id>` (formatted, timestamped log)
 - [x] Tests (SessionStore + CLI)
-- [ ] Docs updated (README, CHANGELOG, help, docs, website version)
-- [ ] Released as tag `v0.2.0`
+- [x] Docs updated (README, CHANGELOG, help, docs, website version)
+- [x] Released as tag `v0.2.0`
 
 ### Later in Version 1
 - [ ] Declare the local tool stable → cut `v1.0.0`
